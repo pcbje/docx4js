@@ -7,7 +7,6 @@ export default class extends Base{
 		super(...arguments)
 		var rels=new Part("",this).rels
 		this.rels={}
-    console.log(">>", rels)
 		Object.keys(rels).forEach(id=>{
 			let rel=rels[id]
 			this.rels[rel.type]=rel.target
