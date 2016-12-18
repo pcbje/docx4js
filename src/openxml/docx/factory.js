@@ -11,68 +11,20 @@ export default class Factory extends Base{
 
 		if('document'==tag)
 			return new (require('./model/document'))(wXml,doc, parent)
-		else if('styles'==tag)
-			return new (require('./model/documentStyles'))(wXml,doc)
-		else if('abstractNum'==tag)
-			return new (require('./model/style/numberingDefinition'))(wXml,doc)
-		else if('num'==tag)
-			return new (require('./model/style/list'))(wXml,doc)
-		else if('style'==tag){
-			switch(wXml.attr('w:type')){
-			case 'paragraph':
-				return new (require('./model/style/paragraph'))(wXml,doc)
-			case 'character':
-				return new (require('./model/style/inline'))(wXml,doc)
-			case 'table':
-				return new (require('./model/style/table'))(wXml,doc)
-			case 'numbering':
-				return new (require('./model/style/numbering'))(wXml,doc)
-			}
-		}else if('docDefaults'==tag)
-			return new (require('./model/style/document'))(wXml,doc)
 		else if('body'==tag)
 			return new (require('./model/body'))(wXml,doc, parent)
 		else if('p'==tag){
-			var styleId=attr(wXml.$1('>pPr>pStyle'),'w:val'), style=doc.style.get(styleId)
-			if(wXml.$1('>pPr>numPr') || (style && style.getNumId()!=-1))
-				return new (require('./model/list'))(wXml,doc,parent)
-
 			let outlineLvl=-1,tmp
-			if(style)
-				outlineLvl=style.getOutlineLevel()
-			else if(tmp=wXml.$1('>pPr>outlineLvl')){
-				tmp=parseInt(attr(tmp))
-				outlineLvl=parseInt(tmp)
-			}
+
+			tmp=parseInt(attr(tmp))
+			outlineLvl=parseInt(tmp)
 
 			if(outlineLvl!=-1)
 				return new (require('./model/heading'))(wXml,doc, parent,outlineLvl)
 
 			return new (require('./model/paragraph'))(wXml,doc,parent)
-		}else if('r'==tag){
-			let style=doc.style.get(attr(wXml.$1('>rPr>rStyle'),'w:val'))
-
-			let outlineLvl=-1, tmp
-			if(style)
-				outlineLvl=style.getOutlineLevel()
-			else if(tmp=wXml.$1('>rPr>outlineLvl')){
-				tmp=attr(tmp)
-				outlineLvl=parseInt(tmp)
-			}
-
-			if(outlineLvl!=-1)
-				return new (require('./model/headingInline'))(wXml,doc,parent,outlineLvl)
-
-			if(wXml.childNodes.length==1 || (wXml.childNodes==2 && wXml.firstChild.localName=='rPr')){
-				switch(wXml.lastChild.localName){
-				case 'fldChar':
-				case 'instrText':
-					return factory(wXml.lastChild,doc,parent)
-				}
-			}
-
-			return new (require('./model/inline'))(wXml,doc,parent)
-		}else if('instrText'==tag)
+		}
+		else if('instrText'==tag)
 				return new (require('./model/fieldInstruct'))(wXml, doc,parent)
 		else if('t'==tag)
 			return new (require('./model/text'))(wXml,doc,parent)
@@ -153,7 +105,7 @@ export default class Factory extends Base{
 
 		return new Model(wXml,doc,parent)
 	}
-	
+
 	createControl(type,wXml,doc,parent){
 		if('text'==type)
 			return new (require('./model/control/text'))(wXml,doc,parent)

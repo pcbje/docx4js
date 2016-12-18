@@ -1,7 +1,6 @@
 import {PassThrough} from "stream"
 import sax from "sax"
 import Part from "../part"
-import Styles from "./styles"
 import HeaderFooter from "./headerFooter"
 
 import FontTheme from "./theme/font"
@@ -9,7 +8,7 @@ import ColorTheme from "./theme/color"
 import FormatTheme from "./theme/format"
 
 
-const builtIn='webSettings,styles,stylesWithEffects,fontTable,numbering,footnotes,endnotes'.split(',')
+const builtIn='webSettings,footnotes,endnotes'.split(',')
 export default class extends Part{
 	_parse1(type){
 		return Promise.all(Object.keys(this.rels).map(id=>{
@@ -29,7 +28,7 @@ export default class extends Part{
 		}
 
 		return this._parse1("settings").then(a=>this._parse1("theme",transPr)).then(a=>{
-			// pcbje: cause error in web worker 
+			// pcbje: cause error in web worker
 			//this.fontTheme=new FontTheme(this.theme.get('theme.themeElements.fontScheme'),this.settings.get('settings.themeFontLang',false)[0].$)
 			//this.colorTheme=new ColorTheme(this.theme.get('theme.themeElements.clrScheme'),this.settings.get('settings.clrSchemeMapping').$)
 			//this.formatTheme=new FormatTheme(this.theme.get('theme.themeElements.fmtScheme'))
@@ -37,11 +36,11 @@ export default class extends Part{
 			return Promise.all(Object.keys(this.rels).map(id=>{
 				let rel=this.rels[id]
 				if(builtIn.indexOf(rel.type)!=-1){
-					return this.doc.getObjectPart(rel.target, (rel.type=='styles' || rel.type=='numbering') ? transPr : null)
+					return this.doc.getObjectPart(rel.target, null)
 						.then(parsed=>this[rel.type]=parsed)
 				}
 			}).filter(a=>a)).then(a=>{
-				this.styles=new Styles(this.styles, this.numbering)
+
 			})
 		})
 	}
@@ -93,11 +92,8 @@ export default class extends Part{
 						let type=tag.split(':').pop()
 						let property=this.doc.toProperty(this.asXmlObject(current),type)
 						current=parent
-						if(pr!=sect){
-							if(tag.substr(-2)=='Pr')
-								current.attributes.directStyle=property
-							else
-								current.attributes[type]=property
+						if(pr!=sect){							
+							current.attributes[type]=property
 						}else
 							sect=property
 
@@ -128,7 +124,7 @@ export default class extends Part{
 							current.children=sections
 							builtIn.forEach(a=>attributes[a]=this[a])
 							attributes.settings=this.settings
-							attributes.directStyle=this.styles.getDefault("document")
+
 							resolve(this.doc.createElement(current))
 						})
 				})
