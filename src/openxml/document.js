@@ -7,6 +7,7 @@ export default class extends Base{
 		super(...arguments)
 		var rels=new Part("",this).rels
 		this.rels={}
+    console.log(">>", rels)
 		Object.keys(rels).forEach(id=>{
 			let rel=rels[id]
 			this.rels[rel.type]=rel.target
@@ -20,7 +21,7 @@ export default class extends Base{
 	createElement(node){
 		return this.onCreateElement(node)
 	}
-	
+
 	onCreateElement(node,type){
 		return node
 	}
@@ -51,7 +52,7 @@ export default class extends Base{
 	pt2Px(pt){
 		return Math.ceil(pt*96/72)
 	}
-	
+
 	cm2Px(cm){
 		return this.pt2Px(parseInt(cm)*28.3464567/360000)
 	}

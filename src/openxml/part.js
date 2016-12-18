@@ -19,18 +19,21 @@ export default class{
 
 		if(!doc.parts[relName]) return;
 		this.relName=relName
-		
+
 		parse(doc.parts[relName].asText(),{mergeAttrs:true,explicitArray:false}, (error, doc)=>{
-			doc.Relationships.Relationship.forEach((a, i)=>{
-				this.rels[a.Id]={
+			var arr = doc.Relationships.Relationship;
+			if (arr.Id) arr = [arr];
+			var x = this;
+			arr.map(function(a) {
+				x.rels[a.Id]={
 					type:a.Type.split('/').pop(),
 					targetMode: a.TargetMode,
 					target:(a.TargetMode!="External" ? (folder ? (folder+"/") : '') : '')+a.Target}
 			})
 		})
-			
+
 	}
-	
+
 	getRel(id){
 		var rel=this.rels[id]
 		if(rel.targetMode=='External')
@@ -42,7 +45,7 @@ export default class{
 			return this.doc.getPart(rel.target)
 		}
 	}
-	
+
 	asXmlObject(node){
 		let $=node.$=node.attributes
 		delete node.attributes
@@ -57,13 +60,13 @@ export default class{
 		})
 		return node
 	}
-	
+
 	getContentStream(){
 		let stream=new PassThrough()
 		stream.end(new Buffer(this.data.asUint8Array()))
 		return stream.pipe(sax.createStream(true,{xmlns:false}))
 	}
-	
+
 	parse(){
 		return Promise.resolve()
 	}

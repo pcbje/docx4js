@@ -29,9 +29,10 @@ export default class extends Part{
 		}
 
 		return this._parse1("settings").then(a=>this._parse1("theme",transPr)).then(a=>{
-			this.fontTheme=new FontTheme(this.theme.get('theme.themeElements.fontScheme'),this.settings.get('settings.themeFontLang',false)[0].$)
-			this.colorTheme=new ColorTheme(this.theme.get('theme.themeElements.clrScheme'),this.settings.get('settings.clrSchemeMapping').$)
-			this.formatTheme=new FormatTheme(this.theme.get('theme.themeElements.fmtScheme'))
+			// pcbje: cause error in web worker 
+			//this.fontTheme=new FontTheme(this.theme.get('theme.themeElements.fontScheme'),this.settings.get('settings.themeFontLang',false)[0].$)
+			//this.colorTheme=new ColorTheme(this.theme.get('theme.themeElements.clrScheme'),this.settings.get('settings.clrSchemeMapping').$)
+			//this.formatTheme=new FormatTheme(this.theme.get('theme.themeElements.fmtScheme'))
 		}).then(a=>{
 			return Promise.all(Object.keys(this.rels).map(id=>{
 				let rel=this.rels[id]
@@ -57,7 +58,7 @@ export default class extends Part{
 				.on("opentag", node=>{
 					node.parent=current
 					current=node
-					
+
 					if(this.doc.isProperty(node) && pr==null){
 						pr=node
 					}
@@ -78,12 +79,12 @@ export default class extends Part{
 				.on("closetag",tag=>{
 					if(tag=='w:document')
 						return;
-					
+
 					const {attributes, parent, children, local,name}=current
 					if(pr==null){
 						let index=parent.children.indexOf(current)
 						attributes.key=index
-						
+
 						let element=this.doc.createElement(current)
 
 						parent.children.splice(index,1,element)
@@ -108,9 +109,9 @@ export default class extends Part{
 							parent[type]=value
 						else if(Array.isArray(parent[type]))
 							parent[type].push(value)
-						else 
+						else
 							parent[type]=[parent[type],value]
-						
+
 						current=parent
 					}
 
@@ -138,7 +139,7 @@ export default class extends Part{
 			})
 		})
 	}
-	
+
 	parseHeaderFooter(sections){
 		return Promise.all(sections.map((section,i)=>{
 			const {attributes:props, children}=section
@@ -154,7 +155,7 @@ export default class extends Part{
 				})
 				delete props.headerReference
 			}
-			
+
 			if(footerReference){
 				if(!Array.isArray(footerReference))
 					footerReference=[footerReference]
@@ -165,7 +166,7 @@ export default class extends Part{
 				})
 				delete props.footerReference
 			}
-			
+
 			return Promise.all([...headers, ...footers])
 				.then(a=>sections.splice(i,1,this.doc.createElement(section)))
 		}))
